@@ -17,23 +17,66 @@ jobs:
       with:
         python-version: '3.10'
     
-    - name: Install dependencies
+    - name: Install system dependencies
       run: |
         sudo apt update
-        sudo apt install -y git zip unzip openjdk-11-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev build-essential
-        pip3 install --user buildozer cython
+        sudo apt install -y \
+          build-essential \
+          git \
+          zip \
+          unzip \
+          openjdk-17-jdk \
+          python3-pip \
+          autoconf \
+          libtool \
+          pkg-config \
+          zlib1g-dev \
+          libncurses5-dev \
+          libncursesw5-dev \
+          cmake \
+          libffi-dev \
+          libssl-dev \
+          ccache \
+          ant \
+          wget \
+          lbzip2 \
+          python3-setuptools
 
-    - name: Setup Android SDK licenses
+    - name: Setup Java environment
+      run: |
+        export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+        echo "JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64" >> $GITHUB_ENV
+        
+    - name: Install Python dependencies
+      run: |
+        python3 -m pip install --upgrade pip
+        python3 -m pip install --user buildozer cython
+        
+    - name: Cache Buildozer global directory
+      uses: actions/cache@v3
+      with:
+        path: .buildozer_global
+        key: buildozer-global-${{ hashFiles('buildozer.spec') }}
+        
+    - name: Cache Buildozer directory
+      uses: actions/cache@v3
+      with:
+        path: .buildozer
+        key: buildozer-${{ hashFiles('buildozer.spec') }}
+        
+    - name: Build with buildozer
       run: |
         export PATH=$PATH:~/.local/bin
-        mkdir -p ~/.android
-        echo "y" | buildozer android update || true
-    
-    - name: Build APK
-      run: |
-        export PATH=$PATH:~/.local/bin
-        # Accept Android SDK licenses
-        yes | buildozer android debug || buildozer android debug
+        export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+        
+        # Accept all SDK licenses
+        mkdir -p "$HOME/.android/sdk/licenses"
+        echo -e "\n24333f8a63b6825ea9c5514f83c2829b004d1fee" > "$HOME/.android/sdk/licenses/android-sdk-license"
+        echo -e "\n84831b9409646a918e30573bab4c9c91346d8abd" > "$HOME/.android/sdk/licenses/android-sdk-preview-license"
+        echo -e "\nd975f751698a77b662f1254ddbeed3901e976f5a" > "$HOME/.android/sdk/licenses/intel-android-extra-license"
+        
+        # Build the APK
+        buildozer android debug
         
     - name: Upload APK
       uses: actions/upload-artifact@v4
