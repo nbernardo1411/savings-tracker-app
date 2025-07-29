@@ -29,22 +29,16 @@ orientation = portrait
 fullscreen = 0
 
 # (int) Target Android API, should be as high as possible.
-android.api = 31
+android.api = 30
 
 # (int) Minimum API your APK will support.
 android.minapi = 21
 
 # (str) Android NDK version to use
-android.ndk = 25b
+android.ndk = 23b
 
 # (str) Android SDK version to use
-android.sdk = 31
-
-# (str) python-for-android git clone directory (if empty, it will be automatically cloned from github)
-p4a.source_dir =
-
-# (str) The directory in which python-for-android should look for your own build recipes (if any)
-p4a.local_recipes =
+android.sdk = 30
 
 # (list) Android application meta-data to set (key=value format)
 android.meta_data = 
